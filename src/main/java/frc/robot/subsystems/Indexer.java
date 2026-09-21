@@ -1,0 +1,94 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot.subsystems;
+
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+public class Indexer extends SubsystemBase {
+    // Step 1: create motors, sensors, etc for the subsysem
+    // setting up motors
+    private SparkMax beltMotor = new SparkMax(51, MotorType.kBrushless); // TODO: Change to the actual can ID
+    private SparkMax feedMotor = new SparkMax(52, MotorType.kBrushless); // TODO: Change to the actual can ID
+
+    // internal variables
+    private double beltPercent = 0.0;
+    private double feedPercent = 0.0;
+
+    /** Creates a new Indexer. */
+    public Indexer() {
+        // Step 2: configure motors
+        configureBeltMotor();
+        configureFeedMotor();
+    }
+
+    private void configureBeltMotor() {
+        SparkMaxConfig config = new SparkMaxConfig();
+        config.smartCurrentLimit(20);
+        config.inverted(false); // TODO: test and change if needed
+        config.idleMode(IdleMode.kCoast);
+        beltMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    }
+
+    private void configureFeedMotor() {
+        SparkMaxConfig config = new SparkMaxConfig();
+        config.smartCurrentLimit(20);
+        config.inverted(false); // TODO: test and change if needed
+        config.idleMode(IdleMode.kCoast);
+        feedMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    }
+
+    @Override
+    public void periodic() {
+        // This method will be called once per scheduler run
+        // Step 4: display on smartdashboard and log values
+        SmartDashboard.putNumber("BeltPercet", this.beltPercent);
+        SmartDashboard.putNumber("FeedPercet", this.feedPercent);
+    }
+
+    // Step 3: cerating interal functions, commands, etc.
+    private void setPercents(double beltPercent, double feedPercent) {
+        // saving my settings so i can see them later
+        this.beltPercent = beltPercent;
+        this.feedPercent = feedPercent;
+
+        // applying the speeds to the motors
+        beltMotor.set(beltPercent);
+        feedMotor.set(feedPercent);
+    }
+
+    /**
+     * Feeds game pices by spining the motors forward
+     * @return A command to feed game pices to the launcher
+     */
+    public Command Feed() {
+        return new StartEndCommand(
+            () -> this.setPercents(1, 1), 
+            () -> this.setPercents(0, 0), 
+            this
+        );
+    }
+
+    /**
+     * Und game pices by spining the motors backwards
+     * @return A command to unfeed game pices from the launcher
+     */
+    public Command BackFeed() {
+        return new StartEndCommand(
+            () -> this.setPercents(-1, -1), 
+            () -> this.setPercents(0, 0), 
+            this
+        );
+    }
+}
