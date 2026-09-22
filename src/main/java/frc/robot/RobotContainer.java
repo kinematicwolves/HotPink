@@ -14,11 +14,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Indexer;
+import frc.robot.subsystems.Intake;
 
 public class RobotContainer {
     private double MaxSpeed = 0.5 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -40,6 +40,7 @@ public class RobotContainer {
     /* Create subsystems */
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final Indexer indexer = new Indexer();
+    public final Intake intake = new Intake();
 
     public RobotContainer() {
         configureBindings();
@@ -69,9 +70,13 @@ public class RobotContainer {
         driverController.a().whileTrue(drivetrain.applyRequest(() -> brake));
         driverController.y().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric)); // Reset the field-centric heading on left bumper press.
         driverController.rightBumper().whileTrue(indexer.Feed());
-        
+        driverController.leftBumper().onTrue(intake.Deploy().andThen(intake.Feed()));
+
         /* opreator controls */
         opController.rightBumper().whileTrue(indexer.BackFeed());
+        opController.leftBumper()
+            .onTrue(intake.Deploy().andThen(intake.UnFeed()))
+            .onFalse(intake.Retract());
     }
 
     public Command getAutonomousCommand() {
