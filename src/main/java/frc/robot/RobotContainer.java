@@ -19,6 +19,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Launcher;
 
 public class RobotContainer {
     private double MaxSpeed = 0.5 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -41,6 +42,7 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final Indexer indexer = new Indexer();
     public final Intake intake = new Intake();
+    public final Launcher launcher = new Launcher();
 
     public RobotContainer() {
         configureBindings();
@@ -71,12 +73,21 @@ public class RobotContainer {
         driverController.y().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric)); // Reset the field-centric heading on left bumper press.
         driverController.rightBumper().whileTrue(indexer.Feed());
         driverController.leftBumper().onTrue(intake.Deploy().andThen(intake.Feed()));
+        driverController.rightTrigger().whileTrue(launcher.enableLauncher());
 
         /* opreator controls */
         opController.rightBumper().whileTrue(indexer.BackFeed());
         opController.leftBumper()
             .onTrue(intake.Deploy().andThen(intake.UnFeed()))
             .onFalse(intake.Retract());
+        opController.povUp()
+            .onTrue(launcher.bumpSpeed(10));
+        opController.povDown()
+            .onTrue(launcher.bumpSpeed(-10));
+        opController.povLeft()
+            .onTrue(launcher.bumpSpeed(-1));
+        opController.povRight()
+            .onTrue(launcher.bumpSpeed(1));
     }
 
     public Command getAutonomousCommand() {
