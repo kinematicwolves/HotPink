@@ -6,10 +6,10 @@ package frc.robot.subsystems;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Indexer extends SubsystemBase {
     // Step 1: create motors, sensors, etc for the subsysem
     // setting up motors
-    private SparkMax beltMotor = new SparkMax(51, MotorType.kBrushless); // TODO: Change to the actual can ID
+    // private SparkMax beltMotor = new SparkMax(51, MotorType.kBrushless); // TODO: Change to the actual can ID
     private SparkMax feedMotor = new SparkMax(52, MotorType.kBrushless); // TODO: Change to the actual can ID
 
     // internal variables
@@ -35,18 +35,39 @@ public class Indexer extends SubsystemBase {
 
     private void configureBeltMotor() {
         SparkMaxConfig config = new SparkMaxConfig();
+
+        // current limits
         config.smartCurrentLimit(20);
-        config.inverted(false); // TODO: test and change if needed
+
+        // Neutral mode
+        // TODO: Pick one and delete the other
         config.idleMode(IdleMode.kCoast);
-        beltMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+
+        // Motor direction
+        // TODO: Test and select one, delete the other
+        config.inverted(false);
+        // config.inverted(true);
+
+        // apply the config
+        // this.beltMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     private void configureFeedMotor() {
         SparkMaxConfig config = new SparkMaxConfig();
-        config.smartCurrentLimit(20);
-        config.inverted(false); // TODO: test and change if needed
+
+        // current limits
+        config.smartCurrentLimit(30);
+
+        // Neutral mode
         config.idleMode(IdleMode.kCoast);
-        feedMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+
+        // Motor direction
+        // TODO: Test and select one, delete the other
+        // config.inverted(true);
+        config.inverted(false);
+
+        // apply the config
+        this.feedMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     @Override
@@ -64,7 +85,7 @@ public class Indexer extends SubsystemBase {
         this.feedPercent = feedPercent;
 
         // applying the speeds to the motors
-        beltMotor.set(beltPercent);
+        // beltMotor.set(beltPercent);
         feedMotor.set(feedPercent);
     }
 
@@ -74,8 +95,8 @@ public class Indexer extends SubsystemBase {
      */
     public Command Feed() {
         return new StartEndCommand(
-            () -> this.setPercents(1, 1), 
-            () -> this.setPercents(0, 0), 
+            () -> this.setPercents(1, 1),
+            () -> this.setPercents(0, 0),
             this
         );
     }
@@ -86,8 +107,8 @@ public class Indexer extends SubsystemBase {
      */
     public Command BackFeed() {
         return new StartEndCommand(
-            () -> this.setPercents(-1, -1), 
-            () -> this.setPercents(0, 0), 
+            () -> this.setPercents(-1, -1),
+            () -> this.setPercents(0, 0),
             this
         );
     }

@@ -18,8 +18,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Intake extends SubsystemBase {
     // Step 1: Create motros, sensors, etc.
-    private final TalonFX pivotMotor  = new TalonFX(53);
-    private final TalonFX rollerMotor = new TalonFX(54);
+    private final TalonFX pivotMotor  = new TalonFX(53); // TODO: Change to the actual can ID
+    private final TalonFX rollerMotor = new TalonFX(54); // TODO: Change to the actual can ID
 
     // internal variables
     // TODO: Test intake motion and set accordingly
@@ -35,57 +35,59 @@ public class Intake extends SubsystemBase {
 
     private void configurePivot() {
         TalonFXConfiguration config = new TalonFXConfiguration();
-        // for a pivot, i configure the following
-        // current limits
-        config.CurrentLimits.StatorCurrentLimit = 30;
+        
+        // Current Limits
+        // TODO: Adjust as needed for your robot
+        config.CurrentLimits.SupplyCurrentLimit = 40;
         config.CurrentLimits.SupplyCurrentLimitEnable = true;
         config.CurrentLimits.StatorCurrentLimit = 40;
         config.CurrentLimits.StatorCurrentLimitEnable = true;
         
-        // direction
-        // TODO: Test and pick the correct one 
+        // Neutral mode
+        // TODO: Pick one and delete the other
+        // config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        
+        // Motor direction
+        // TODO: Test and select one, delete the other.
         config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         // config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         
-        // idle mode
-        config.MotorOutput.NeutralMode = NeutralModeValue.Brake; 
+        // PID
+        // TODO: Tune for your robot
+        config.Slot0.kP = 0.0;
+        config.Slot0.kI = 0.0;
+        config.Slot0.kD = 0.0;
         
-        // position limits / soft limits
-        // TODO: Test and enter good values
-        // config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-        // config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0;
-        // config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-        // config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0;
+        // Soft limits
+        // TODO: Determine positional limits, set, and enable
+        config.SoftwareLimitSwitch.ForwardSoftLimitEnable = false;
+        config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0;
+        config.SoftwareLimitSwitch.ReverseSoftLimitEnable = false;
+        config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0;
         
-        // pid
-        // TODO: test and set kp
-        config.Slot0.kP = 0; // set to be 1 / totoal sensor range 
-        config.Slot0.kI = 0;
-        config.Slot0.kD = 0;
-
-        // apply the config to my motor
+        // apply the config
         this.pivotMotor.getConfigurator().apply(config);
-
-        this.pivotMotor.setPosition(0.0);
     }
 
     private void configureRoller() {
         TalonFXConfiguration config = new TalonFXConfiguration();
-        // curent limits
+        
+        // Current Limits
         config.CurrentLimits.SupplyCurrentLimit = 20;
         config.CurrentLimits.SupplyCurrentLimitEnable = true;
         config.CurrentLimits.StatorCurrentLimit = 20;
         config.CurrentLimits.StatorCurrentLimitEnable = true;
-
-        // direction
-        // TODO: Test and pick the correct one
+        
+        // Neutral mode
+        config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        
+        // Motor direction
+        // TODO: Test and select one, delete the other
         config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         // config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-
-        // idle mode
-        config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-
-        // apply my config to my motor
+        
+        // apply the config
         this.rollerMotor.getConfigurator().apply(config);
     }
 
@@ -98,20 +100,23 @@ public class Intake extends SubsystemBase {
     }
 
     // Step 3: cerate interal functions, commands, etc
+
     /**
-     * Sets the roller percetn
-     * @param percet a value between -1 and 1
-     */
-    private void setRollerPercent(double percet) {
-        this.rollerMotor.set(percet);
+    * Sets rollerMotor's speed to the value
+    * @param speed, -1 to 1
+    */
+    public void setRollerMotorPercent(double speed) {
+        // Basic TalonFX make it spin
+        this.rollerMotor.set(speed);
     }
 
     /**
-     * Sets the pivot position in encoder counts
-     * @param pose the encoder count to move to
-     */
-    private void setPivotPose(double pose) {
-        this.pivotMotor.setControl(new PositionVoltage(pose).withSlot(0));
+    * Sets pivotMotor's position to the value
+    * @param position, Rotations / second
+    */
+    public void setPivotMotorPose(double position) {
+        // Basic TalonFX Position Control
+        this.pivotMotor.setControl(new PositionVoltage(position));
     }
 
     /**
@@ -127,7 +132,7 @@ public class Intake extends SubsystemBase {
      * @return a command to rectract the intake
      */
     public Command Retract() {
-        return Commands.run(() -> this.setPivotPose(this.retractPose), this).until(() -> this.pivotAtPose());
+        return Commands.run(() -> this.setPivotMotorPose(this.retractPose), this).until(() -> this.pivotAtPose());
     }
 
     /**
@@ -135,7 +140,7 @@ public class Intake extends SubsystemBase {
      * @return a command to deploy the intake
      */
     public Command Deploy() {
-        return Commands.run(() -> this.setPivotPose(this.deployPose), this).until(() -> this.pivotAtPose());
+        return Commands.run(() -> this.setPivotMotorPose(this.deployPose), this).until(() -> this.pivotAtPose());
     }
 
     /**
@@ -144,8 +149,8 @@ public class Intake extends SubsystemBase {
      */
     public Command Feed() {
         return new StartEndCommand(
-            () -> setRollerPercent(1),
-            () -> setRollerPercent(0),
+            () -> setRollerMotorPercent(1),
+            () -> setRollerMotorPercent(0),
             this
         );
     }
@@ -156,8 +161,8 @@ public class Intake extends SubsystemBase {
      */
     public Command UnFeed() {
         return new StartEndCommand(
-            () -> setRollerPercent(-1),
-            () -> setRollerPercent(0),
+            () -> setRollerMotorPercent(-1),
+            () -> setRollerMotorPercent(0),
             this
         );
 

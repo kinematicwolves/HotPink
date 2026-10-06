@@ -36,7 +36,7 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     private final CommandXboxController driverController = new CommandXboxController(0);
-    private final CommandXboxController opController     = new CommandXboxController(1);
+    // private final CommandXboxController opController     = new CommandXboxController(1);
 
     /* Create subsystems */
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
@@ -76,17 +76,17 @@ public class RobotContainer {
         driverController.rightTrigger().whileTrue(launcher.enableLauncher());
 
         /* opreator controls */
-        opController.rightBumper().whileTrue(indexer.BackFeed());
-        opController.leftBumper()
+        driverController.rightBumper().whileTrue(indexer.BackFeed());
+        driverController.leftBumper()
             .onTrue(intake.Deploy().andThen(intake.UnFeed()))
             .onFalse(intake.Retract());
-        opController.povUp()
+        driverController.povUp()
             .onTrue(launcher.bumpSpeed(10));
-        opController.povDown()
+        driverController.povDown()
             .onTrue(launcher.bumpSpeed(-10));
-        opController.povLeft()
+        driverController.povLeft()
             .onTrue(launcher.bumpSpeed(-1));
-        opController.povRight()
+        driverController.povRight()
             .onTrue(launcher.bumpSpeed(1));
     }
 
