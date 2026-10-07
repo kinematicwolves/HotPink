@@ -19,37 +19,15 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Indexer extends SubsystemBase {
     // Step 1: create motors, sensors, etc for the subsysem
     // setting up motors
-    // private SparkMax beltMotor = new SparkMax(51, MotorType.kBrushless); // TODO: Change to the actual can ID
-    private SparkMax feedMotor = new SparkMax(52, MotorType.kBrushless); // TODO: Change to the actual can ID
+    private SparkMax feedMotor = new SparkMax(52, MotorType.kBrushless);
 
     // internal variables
-    private double beltPercent = 0.0;
     private double feedPercent = 0.0;
 
     /** Creates a new Indexer. */
     public Indexer() {
         // Step 2: configure motors
-        configureBeltMotor();
         configureFeedMotor();
-    }
-
-    private void configureBeltMotor() {
-        SparkMaxConfig config = new SparkMaxConfig();
-
-        // current limits
-        config.smartCurrentLimit(20);
-
-        // Neutral mode
-        // TODO: Pick one and delete the other
-        config.idleMode(IdleMode.kCoast);
-
-        // Motor direction
-        // TODO: Test and select one, delete the other
-        config.inverted(false);
-        // config.inverted(true);
-
-        // apply the config
-        // this.beltMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     private void configureFeedMotor() {
@@ -62,9 +40,7 @@ public class Indexer extends SubsystemBase {
         config.idleMode(IdleMode.kCoast);
 
         // Motor direction
-        // TODO: Test and select one, delete the other
-        // config.inverted(true);
-        config.inverted(false);
+        config.inverted(true);
 
         // apply the config
         this.feedMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -74,18 +50,15 @@ public class Indexer extends SubsystemBase {
     public void periodic() {
         // This method will be called once per scheduler run
         // Step 4: display on smartdashboard and log values
-        SmartDashboard.putNumber("BeltPercet", this.beltPercent);
         SmartDashboard.putNumber("FeedPercet", this.feedPercent);
     }
 
     // Step 3: cerating interal functions, commands, etc.
-    private void setPercents(double beltPercent, double feedPercent) {
+    private void setPercents(double feedPercent) {
         // saving my settings so i can see them later
-        this.beltPercent = beltPercent;
         this.feedPercent = feedPercent;
 
         // applying the speeds to the motors
-        // beltMotor.set(beltPercent);
         feedMotor.set(feedPercent);
     }
 
@@ -95,8 +68,8 @@ public class Indexer extends SubsystemBase {
      */
     public Command Feed() {
         return new StartEndCommand(
-            () -> this.setPercents(1, 1),
-            () -> this.setPercents(0, 0),
+            () -> this.setPercents(1),
+            () -> this.setPercents(0),
             this
         );
     }
@@ -107,8 +80,8 @@ public class Indexer extends SubsystemBase {
      */
     public Command BackFeed() {
         return new StartEndCommand(
-            () -> this.setPercents(-1, -1),
-            () -> this.setPercents(0, 0),
+            () -> this.setPercents(-1),
+            () -> this.setPercents(0),
             this
         );
     }

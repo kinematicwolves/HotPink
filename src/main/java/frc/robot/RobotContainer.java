@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Indexer;
@@ -36,13 +36,16 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     private final CommandXboxController driverController = new CommandXboxController(0);
-    // private final CommandXboxController opController     = new CommandXboxController(1);
+    private final CommandXboxController opController     = new CommandXboxController(1);
 
     /* Create subsystems */
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    public final Indexer indexer = new Indexer();
-    public final Intake intake = new Intake();
+    public final Indexer  indexer  = new Indexer();
+    public final Intake   intake   = new Intake();
     public final Launcher launcher = new Launcher();
+
+    /* Custom triggers */
+    public final Trigger launcherReady = new Trigger(() -> this.launcher.atTargetSpeed());
 
     public RobotContainer() {
         configureBindings();
@@ -69,24 +72,33 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
         
         /* Driver controls */
-        driverController.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        driverController.y().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric)); // Reset the field-centric heading on left bumper press.
-        driverController.rightBumper().whileTrue(indexer.Feed());
-        driverController.leftBumper().onTrue(intake.Deploy().andThen(intake.Feed()));
-        driverController.rightTrigger().whileTrue(launcher.enableLauncher());
+        driverController.a()
+            .whileTrue(drivetrain.applyRequest(() -> brake));
+        driverController.y()
+            .onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));// Reset the field-centric heading on left bumper press.
+        driverController.rightBumper()
+            .whileTrue(indexer.Feed());
+        driverController.leftBumper()
+            .onTrue(intake.Deploy().andThen(intake.Feed()));
+        driverController.rightTrigger().and(launcherReady)
+            .whileTrue(launcher.enableLauncher());
 
         /* opreator controls */
-        driverController.rightBumper().whileTrue(indexer.BackFeed());
-        driverController.leftBumper()
+        opController.rightBumper()
+            .whileTrue(indexer.BackFeed());
+        opController.leftBumper()
             .onTrue(intake.Deploy().andThen(intake.UnFeed()))
             .onFalse(intake.Retract());
-        driverController.povUp()
+        opController.leftTrigger()
+            .onTrue(intake.Deploy())
+            .onFalse(intake.Retract());
+        opController.povUp()
             .onTrue(launcher.bumpSpeed(10));
-        driverController.povDown()
+        opController.povDown()
             .onTrue(launcher.bumpSpeed(-10));
-        driverController.povLeft()
+        opController.povLeft()
             .onTrue(launcher.bumpSpeed(-1));
-        driverController.povRight()
+        opController.povRight()
             .onTrue(launcher.bumpSpeed(1));
     }
 

@@ -16,16 +16,15 @@ import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Launcher extends SubsystemBase {
     // Step 1: setup any motors, sensors, and other variables
-    private final TalonFX motorA = new TalonFX(55); // TODO: Change to the actual can ID
-    private final TalonFX motorB = new TalonFX(56); // TODO: Change to the actual can ID
+    private final TalonFX motorA = new TalonFX(55);
+    private final TalonFX motorB = new TalonFX(56);
 
-    private double launchSpeed = 10.0;
+    private double launchSpeed = 50.0;
 
     private LinearFilter averageLauncherSpeed = LinearFilter.movingAverage(25);
 
@@ -39,21 +38,19 @@ public class Launcher extends SubsystemBase {
     private void configrueMotorA() {
         // https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/device-specific/talonfx/basic-pid-control.html
         TalonFXConfiguration config = new TalonFXConfiguration();
-        
+
         // Current limts
         config.CurrentLimits.SupplyCurrentLimit = 40;
         config.CurrentLimits.SupplyCurrentLimitEnable = true;
         config.CurrentLimits.StatorCurrentLimit = 40;
         config.CurrentLimits.StatorCurrentLimitEnable = true;
-        
+
         // Neutral mode
         config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        
+
         // Motor direction
-        // TODO: Pick one and delete the other
         config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-        // config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-        
+
         // PID velocity
         // TODO: This will probably make it move, but tune for your robot
         config.Slot0.kS = 0.1; // Add 0.1 V output to overcome static friction
@@ -61,7 +58,7 @@ public class Launcher extends SubsystemBase {
         config.Slot0.kP = 0.11; // An error of 1 rps results in 0.11 V output
         config.Slot0.kI = 0; // no output for integrated error
         config.Slot0.kD = 0; // no output for error derivative
-        
+
         // apply the config to the motor
         this.motorA.getConfigurator().apply(config);
     }
@@ -73,13 +70,13 @@ public class Launcher extends SubsystemBase {
         config.CurrentLimits.SupplyCurrentLimitEnable = true;
         config.CurrentLimits.StatorCurrentLimit = 40;
         config.CurrentLimits.StatorCurrentLimitEnable = true;
-        
+
         // Neutral mode
         config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        
+
         // apply the config
         this.motorB.getConfigurator().apply(config);
-        
+
         // Tell this motor to follow whatever the leader does
         this.motorB.setControl(new Follower(this.motorA.getDeviceID(), MotorAlignmentValue.Opposed));
     }
@@ -118,8 +115,8 @@ public class Launcher extends SubsystemBase {
      */
     public Command enableLauncher() {
         return new StartEndCommand(
-            () -> this.setMotorAVel(this.launchSpeed), 
-            () -> this.motorA.stopMotor(), 
+            () -> this.setMotorAVel(this.launchSpeed),
+            () -> this.motorA.stopMotor(), // let the launcher spin down
             this
         );
     }
