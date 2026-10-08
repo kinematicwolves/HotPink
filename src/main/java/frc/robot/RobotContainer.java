@@ -68,9 +68,9 @@ public class RobotContainer {
         // neutral mode is applied to the drive motors while disabled.
         final var idle = new SwerveRequest.Idle();
         RobotModeTriggers.disabled().whileTrue(drivetrain.applyRequest(() -> idle).ignoringDisable(true));
-        
+
         drivetrain.registerTelemetry(logger::telemeterize);
-        
+
         /* Driver controls */
         driverController.y()
             .onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));// Reset the field-centric heading on left bumper press.
@@ -82,7 +82,7 @@ public class RobotContainer {
             .onTrue(intake.Deploy());
         driverController.leftBumper()
             .whileTrue(intake.Feed());
-        
+
         /* opreator controls */
         opController.a()
             .whileTrue(drivetrain.applyRequest(() -> brake));
