@@ -52,7 +52,6 @@ public class Launcher extends SubsystemBase {
         config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
         // PID velocity
-        // TODO: This will probably make it move, but tune for your robot
         config.Slot0.kS = 0.1; // Add 0.1 V output to overcome static friction
         config.Slot0.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
         config.Slot0.kP = 0.11; // An error of 1 rps results in 0.11 V output

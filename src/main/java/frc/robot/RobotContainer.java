@@ -76,22 +76,24 @@ public class RobotContainer {
             .whileTrue(drivetrain.applyRequest(() -> brake));
         driverController.y()
             .onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));// Reset the field-centric heading on left bumper press.
-        driverController.rightBumper()
+        driverController.rightBumper().and(launcherReady)
             .whileTrue(indexer.Feed());
+        driverController.leftTrigger()
+            .onTrue(intake.Deploy());
         driverController.leftBumper()
-            .onTrue(intake.Deploy().andThen(intake.Feed()));
-        driverController.rightTrigger().and(launcherReady)
+            .whileTrue(intake.Feed());
+        driverController.rightTrigger()
             .whileTrue(launcher.enableLauncher());
 
-        /* opreator controls */
-        opController.rightBumper()
-            .whileTrue(indexer.BackFeed());
+        // /* opreator controls */
+        // opController.rightBumper()
+        //     .whileTrue(indexer.BackFeed());
         opController.leftBumper()
-            .onTrue(intake.Deploy().andThen(intake.UnFeed()))
-            .onFalse(intake.Retract());
-        opController.leftTrigger()
             .onTrue(intake.Deploy())
             .onFalse(intake.Retract());
+        // opController.leftTrigger()
+        //     .onTrue(intake.Deploy())
+        //     .onFalse(intake.Retract());
         opController.povUp()
             .onTrue(launcher.bumpSpeed(10));
         opController.povDown()

@@ -22,9 +22,8 @@ public class Intake extends SubsystemBase {
     private final TalonFX rollerMotor = new TalonFX(54); // TODO: Change to the actual can ID
 
     // internal variables
-    // TODO: Test intake motion and set accordingly
     private final double deployPose  = 0.0;
-    private final double retractPose = 0.0;
+    private final double retractPose = -36.0;
 
     /** Creates a new Intake. */
     public Intake() {
@@ -37,34 +36,27 @@ public class Intake extends SubsystemBase {
         TalonFXConfiguration config = new TalonFXConfiguration();
         
         // Current Limits
-        // TODO: Adjust as needed for your robot
         config.CurrentLimits.SupplyCurrentLimit = 40;
         config.CurrentLimits.SupplyCurrentLimitEnable = true;
         config.CurrentLimits.StatorCurrentLimit = 40;
         config.CurrentLimits.StatorCurrentLimitEnable = true;
         
         // Neutral mode
-        // TODO: Pick one and delete the other
-        // config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         
         // Motor direction
-        // TODO: Test and select one, delete the other.
         config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-        // config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         
         // PID
-        // TODO: Tune for your robot
-        config.Slot0.kP = 0.0;
+        config.Slot0.kP = 0.25;
         config.Slot0.kI = 0.0;
         config.Slot0.kD = 0.0;
         
         // Soft limits
-        // TODO: Determine positional limits, set, and enable
-        config.SoftwareLimitSwitch.ForwardSoftLimitEnable = false;
+        config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
         config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0;
-        config.SoftwareLimitSwitch.ReverseSoftLimitEnable = false;
-        config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0;
+        config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+        config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = -36;
         
         // apply the config
         this.pivotMotor.getConfigurator().apply(config);
@@ -83,9 +75,7 @@ public class Intake extends SubsystemBase {
         config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         
         // Motor direction
-        // TODO: Test and select one, delete the other
         config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-        // config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         
         // apply the config
         this.rollerMotor.getConfigurator().apply(config);
@@ -124,7 +114,7 @@ public class Intake extends SubsystemBase {
      * @return True if pivot is at its position, othewise false
      */
     private boolean pivotAtPose() {
-        return this.pivotMotor.getClosedLoopError().getValue() < 0.1;
+        return this.pivotMotor.getClosedLoopError().getValue() < 2;
     }
 
     /**
@@ -149,8 +139,8 @@ public class Intake extends SubsystemBase {
      */
     public Command Feed() {
         return new StartEndCommand(
-            () -> setRollerMotorPercent(1),
-            () -> setRollerMotorPercent(0),
+            () -> setRollerMotorPercent(0.2),
+            () -> this.rollerMotor.stopMotor(),
             this
         );
     }
