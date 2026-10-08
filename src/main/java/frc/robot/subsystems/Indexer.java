@@ -15,11 +15,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.IndexerProfile;
 
 public class Indexer extends SubsystemBase {
     // Step 1: create motors, sensors, etc for the subsysem
     // setting up motors
-    private SparkMax feedMotor = new SparkMax(52, MotorType.kBrushless);
+    private SparkMax feedMotor = new SparkMax(IndexerProfile.feedMotorCANID, MotorType.kBrushless);
 
     // internal variables
     private double feedPercent = 0.0;
@@ -68,7 +69,7 @@ public class Indexer extends SubsystemBase {
      */
     public Command Feed() {
         return new StartEndCommand(
-            () -> this.setPercents(1),
+            () -> this.setPercents(IndexerProfile.feedPercent),
             () -> this.setPercents(0),
             this
         );
@@ -80,7 +81,7 @@ public class Indexer extends SubsystemBase {
      */
     public Command BackFeed() {
         return new StartEndCommand(
-            () -> this.setPercents(-1),
+            () -> this.setPercents(IndexerProfile.backfeedPercent),
             () -> this.setPercents(0),
             this
         );

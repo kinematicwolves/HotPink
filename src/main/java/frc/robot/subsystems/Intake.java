@@ -15,15 +15,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.IntakeProfile;
 
 public class Intake extends SubsystemBase {
     // Step 1: Create motros, sensors, etc.
-    private final TalonFX pivotMotor  = new TalonFX(53); // TODO: Change to the actual can ID
-    private final TalonFX rollerMotor = new TalonFX(54); // TODO: Change to the actual can ID
-
-    // internal variables
-    private final double deployPose  = 0.0;
-    private final double retractPose = -36.0;
+    private final TalonFX pivotMotor  = new TalonFX(IntakeProfile.pivotMotorCANID);
+    private final TalonFX rollerMotor = new TalonFX(IntakeProfile.rollerMotorCANID);
 
     /** Creates a new Intake. */
     public Intake() {
@@ -114,7 +111,7 @@ public class Intake extends SubsystemBase {
      * @return True if pivot is at its position, othewise false
      */
     private boolean pivotAtPose() {
-        return this.pivotMotor.getClosedLoopError().getValue() < 2;
+        return this.pivotMotor.getClosedLoopError().getValue() < IntakeProfile.poseTolerance;
     }
 
     /**
@@ -122,7 +119,7 @@ public class Intake extends SubsystemBase {
      * @return a command to rectract the intake
      */
     public Command Retract() {
-        return Commands.run(() -> this.setPivotMotorPose(this.retractPose), this).until(() -> this.pivotAtPose());
+        return Commands.run(() -> this.setPivotMotorPose(IntakeProfile.retractPose), this).until(() -> this.pivotAtPose());
     }
 
     /**
@@ -130,7 +127,7 @@ public class Intake extends SubsystemBase {
      * @return a command to deploy the intake
      */
     public Command Deploy() {
-        return Commands.run(() -> this.setPivotMotorPose(this.deployPose), this).until(() -> this.pivotAtPose());
+        return Commands.run(() -> this.setPivotMotorPose(IntakeProfile.deployPose), this).until(() -> this.pivotAtPose());
     }
 
     /**
@@ -139,7 +136,7 @@ public class Intake extends SubsystemBase {
      */
     public Command Feed() {
         return new StartEndCommand(
-            () -> setRollerMotorPercent(0.2),
+            () -> setRollerMotorPercent(IntakeProfile.intakePercent),
             () -> this.rollerMotor.stopMotor(),
             this
         );
@@ -151,7 +148,7 @@ public class Intake extends SubsystemBase {
      */
     public Command UnFeed() {
         return new StartEndCommand(
-            () -> setRollerMotorPercent(-1),
+            () -> setRollerMotorPercent(IntakeProfile.outtakePercent),
             () -> setRollerMotorPercent(0),
             this
         );

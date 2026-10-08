@@ -18,15 +18,16 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.LauncherProfile;
 
 public class Launcher extends SubsystemBase {
     // Step 1: setup any motors, sensors, and other variables
-    private final TalonFX motorA = new TalonFX(55);
-    private final TalonFX motorB = new TalonFX(56);
+    private final TalonFX motorA = new TalonFX(LauncherProfile.motorACANID);
+    private final TalonFX motorB = new TalonFX(LauncherProfile.motorBCANID);
 
     private double launchSpeed = 50.0;
 
-    private LinearFilter averageLauncherSpeed = LinearFilter.movingAverage(25);
+    private LinearFilter averageLauncherSpeed = LinearFilter.movingAverage(LauncherProfile.movingAverageTaps);
 
     /** Creates a new Launcher. */
     public Launcher() {
@@ -105,7 +106,7 @@ public class Launcher extends SubsystemBase {
      * @return true if the launcher is at its target speed, otherwise false
      */
     public boolean atTargetSpeed() {
-        return this.averageLauncherSpeed.calculate(this.motorA.getClosedLoopError().getValueAsDouble()) < 1;
+        return this.averageLauncherSpeed.calculate(this.motorA.getClosedLoopError().getValueAsDouble()) < LauncherProfile.velocityTolerance;
     }
 
     /**
