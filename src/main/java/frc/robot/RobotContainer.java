@@ -72,20 +72,20 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
         
         /* Driver controls */
-        driverController.a()
-            .whileTrue(drivetrain.applyRequest(() -> brake));
         driverController.y()
             .onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));// Reset the field-centric heading on left bumper press.
         driverController.rightBumper().and(launcherReady)
             .whileTrue(indexer.Feed());
+        driverController.rightTrigger()
+            .whileTrue(launcher.enableLauncher());
         driverController.leftTrigger()
             .onTrue(intake.Deploy());
         driverController.leftBumper()
             .whileTrue(intake.Feed());
-        driverController.rightTrigger()
-            .whileTrue(launcher.enableLauncher());
-
-        // /* opreator controls */
+        
+        /* opreator controls */
+        opController.a()
+            .whileTrue(drivetrain.applyRequest(() -> brake));
         // opController.rightBumper()
         //     .whileTrue(indexer.BackFeed());
         opController.leftBumper()
