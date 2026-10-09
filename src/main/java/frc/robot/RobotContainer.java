@@ -14,10 +14,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.Indexer;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Launcher;
 
 public class RobotContainer {
     private double MaxSpeed = 0.5 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -25,56 +27,81 @@ public class RobotContainer {
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-            .withDriveRequestType(DriveRequestType.Velocity); // Use open-loop control for drive motors
+        .withDeadband(MaxSpeed * 0.1)
+        .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+        .withDriveRequestType(DriveRequestType.Velocity); // Use open-loop control for drive motors
+
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-    private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
-    private final CommandXboxController joystick = new CommandXboxController(0);
+    private final CommandXboxController driverController = new CommandXboxController(0);
+    private final CommandXboxController opController     = new CommandXboxController(1);
 
+    /* Create subsystems */
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    public final Indexer  indexer  = new Indexer();
+    public final Intake   intake   = new Intake();
+    public final Launcher launcher = new Launcher();
+
+    /* Custom triggers */
+    public final Trigger launcherReady = new Trigger(() -> this.launcher.atTargetSpeed());
 
     public RobotContainer() {
         configureBindings();
     }
 
     private void configureBindings() {
+        /* default swereve stuff */
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+                drive.withVelocityX(-driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(-driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                    .withRotationalRate(-driverController.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
 
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
         final var idle = new SwerveRequest.Idle();
-        RobotModeTriggers.disabled().whileTrue(
-            drivetrain.applyRequest(() -> idle).ignoringDisable(true)
-        );
-
-        joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        joystick.b().whileTrue(drivetrain.applyRequest(() ->
-            point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
-        ));
-
-        // Run SysId routines when holding back/start and X/Y.
-        // Note that each routine should be run exactly once in a single log.
-        joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-
-        // Reset the field-centric heading on left bumper press.
-        joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+        RobotModeTriggers.disabled().whileTrue(drivetrain.applyRequest(() -> idle).ignoringDisable(true));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+
+        /* Driver controls */
+        driverController.y()
+            .onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));// Reset the field-centric heading on left bumper press.
+        driverController.rightBumper().and(launcherReady)
+            .whileTrue(indexer.Feed());
+        driverController.rightTrigger()
+            .whileTrue(launcher.enableLauncher());
+        driverController.leftTrigger()
+            .onTrue(intake.Deploy());
+        driverController.leftBumper()
+            .whileTrue(intake.Feed());
+
+        /* opreator controls */
+        opController.a()
+            .whileTrue(drivetrain.applyRequest(() -> brake));
+        // opController.rightBumper()
+        //     .whileTrue(indexer.BackFeed());
+        opController.leftBumper()
+            .onTrue(intake.Deploy())
+            .onFalse(intake.Retract());
+        // opController.leftTrigger()
+        //     .onTrue(intake.Deploy())
+        //     .onFalse(intake.Retract());
+        opController.povUp()
+            .onTrue(launcher.bumpSpeed(10));
+        opController.povDown()
+            .onTrue(launcher.bumpSpeed(-10));
+        opController.povLeft()
+            .onTrue(launcher.bumpSpeed(-1));
+        opController.povRight()
+            .onTrue(launcher.bumpSpeed(1));
     }
 
     public Command getAutonomousCommand() {

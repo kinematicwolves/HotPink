@@ -1,0 +1,112 @@
+{
+  "version": 1.0,
+  "grid_size": 128,
+  "tabs": [
+    {
+      "name": "Tab 1",
+      "grid_layout": {
+        "layouts": [],
+        "containers": [
+          {
+            "title": "FeedPercet",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 384.0,
+            "height": 384.0,
+            "type": "Radial Gauge",
+            "properties": {
+              "topic": "/SmartDashboard/FeedPercet",
+              "period": 0.06,
+              "data_type": "double",
+              "start_angle": -140.0,
+              "end_angle": 140.0,
+              "min_value": 0.0,
+              "max_value": 1.0,
+              "number_of_labels": 10,
+              "wrap_value": false,
+              "show_pointer": true,
+              "show_ticks": true
+            }
+          },
+          {
+            "title": "LaucherTargetSpeed",
+            "x": 384.0,
+            "y": 0.0,
+            "width": 384.0,
+            "height": 384.0,
+            "type": "Large Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/LaucherTargetSpeed",
+              "period": 0.06,
+              "data_type": "double"
+            }
+          },
+          {
+            "title": "LauncherAtSpeed",
+            "x": 768.0,
+            "y": 0.0,
+            "width": 384.0,
+            "height": 384.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/LauncherAtSpeed",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "LauncherSpeed",
+            "x": 1152.0,
+            "y": 0.0,
+            "width": 384.0,
+            "height": 384.0,
+            "type": "Large Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/LauncherSpeed",
+              "period": 0.06,
+              "data_type": "double"
+            }
+          },
+          {
+            "title": "PivotAtPose",
+            "x": 1536.0,
+            "y": 0.0,
+            "width": 384.0,
+            "height": 256.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/PivotAtPose",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "PivotPose",
+            "x": 1536.0,
+            "y": 256.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "Number Slider",
+            "properties": {
+              "topic": "/SmartDashboard/PivotPose",
+              "period": 0.1,
+              "data_type": "double",
+              "min_value": -50.0,
+              "max_value": 0.0,
+              "divisions": 5,
+              "update_continuously": false
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
