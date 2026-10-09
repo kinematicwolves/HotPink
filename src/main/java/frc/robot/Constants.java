@@ -11,7 +11,7 @@ public class Constants {
         public static int rollerMotorCANID =   54;
 
         public static double deployPose     =   0.0;
-        public static double retractPose    = -36.0;
+        public static double retractPose    = -30.0;
         public static double intakePercent  =   0.4;
         public static double outtakePercent =  -0.4;
         public static double poseTolerance  =   2.0;
